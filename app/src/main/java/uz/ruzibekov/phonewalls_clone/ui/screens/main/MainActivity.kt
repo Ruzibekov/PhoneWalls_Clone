@@ -1,15 +1,16 @@
 package uz.ruzibekov.phonewalls_clone.ui.screens.main
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
+import uz.ruzibekov.phonewalls_clone.ui.screens.base.BaseActivity
+import uz.ruzibekov.phonewalls_clone.ui.screens.main._content.MainContentView
 
-class MainActivity : ComponentActivity() {
+class MainActivity : BaseActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            NavGraph.Default()
-        }
+    override val content: @Composable () -> Unit = {
+        MainContentView.Default()
+    }
+
+    override fun initialize() {
+
     }
 }
