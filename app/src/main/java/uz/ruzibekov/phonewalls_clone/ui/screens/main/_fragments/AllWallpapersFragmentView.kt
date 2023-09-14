@@ -1,12 +1,9 @@
 package uz.ruzibekov.phonewalls_clone.ui.screens.main._fragments
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,19 +11,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import uz.ruzibekov.phonewalls_clone.R
+import coil.compose.AsyncImage
+import uz.ruzibekov.phonewalls_clone.data.model.CatImageResponse
+import uz.ruzibekov.phonewalls_clone.ui.screens.main.MainViewModel
+import uz.ruzibekov.phonewalls_clone.ui.screens.main.event.MainEvents
+import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainUIState
 import uz.ruzibekov.phonewalls_clone.ui.theme.Brushes
 import uz.ruzibekov.phonewalls_clone.ui.theme.PhoneWallsColors
 import uz.ruzibekov.phonewalls_clone.ui.theme.PhoneWallsIcons
@@ -34,35 +38,59 @@ import uz.ruzibekov.phonewalls_clone.ui.theme.PhoneWallsIcons
 object AllWallpapersFragmentView {
 
     @Composable
-    fun Default() {
+    fun Default(viewModel: MainViewModel) {
+
+        val state by viewModel.state.collectAsState()
+
+        when (state) {
+
+            is MainUIState.Loading -> CircularProgressIndicator()
+
+            is MainUIState.ImagesLoaded -> Content(list = (state as MainUIState.ImagesLoaded).list) {
+                viewModel.send(MainEvents.OpenImageDetails(it))
+            }
+
+            is MainUIState.Error -> Text(text = (state as MainUIState.Error).message.toString())
+        }
+    }
+
+    @Composable
+    private fun Content(
+        list: List<CatImageResponse>,
+        onClick: (url: String) -> Unit
+    ) {
 
         LazyVerticalGrid(
             columns = GridCells.Adaptive(150.dp),
             contentPadding = PaddingValues(2.5.dp)
         ) {
 
-            items(10) {
+            items(list) {
 
-                Item()
+                Item(data = it, onClick = onClick)
             }
         }
     }
 
     @Composable
-    fun Item() {
+    private fun Item(
+        data: CatImageResponse,
+        onClick: (url: String) -> Unit
+    ) {
 
         Box(
             modifier = Modifier
                 .padding(2.5.dp)
                 .fillMaxWidth()
                 .height(250.dp)
-                .clip(RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.BottomCenter
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { onClick(data.url) },
+            contentAlignment = Alignment.BottomEnd
         ) {
 
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_background),
-                contentDescription = "wallpaper image",
+            AsyncImage(
+                model = data.url,
+                contentDescription = "cat image",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
@@ -73,27 +101,6 @@ object AllWallpapersFragmentView {
                     .background(Brushes.Dark_Transparent)
             )
 
-            Row(
-                modifier = Modifier.padding(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Column(modifier = Modifier.weight(1f)) {
-
-                    Text(
-                        text = "Title",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = PhoneWallsColors.White
-                    )
-
-                    Spacer(modifier = Modifier.height(5.dp))
-
-                    Text(
-                        text = "Phone model",
-                        color = PhoneWallsColors.White
-                    )
-                }
-
                 IconButton(onClick = { /*TODO*/ }) {
 
                     Icon(
@@ -103,7 +110,6 @@ object AllWallpapersFragmentView {
                         tint = PhoneWallsColors.White
                     )
                 }
-            }
         }
     }
 }
