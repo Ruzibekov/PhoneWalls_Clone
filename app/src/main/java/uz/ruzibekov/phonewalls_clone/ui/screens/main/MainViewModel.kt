@@ -3,13 +3,16 @@ package uz.ruzibekov.phonewalls_clone.ui.screens.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import uz.ruzibekov.phonewalls_clone.data.api.ApiService
-import uz.ruzibekov.phonewalls_clone.ui.screens.main.event.MainEvents
-import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainUIState
+import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainEffect
+import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainIntent
+import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainState
 import javax.inject.Inject
 
 
@@ -18,25 +21,36 @@ class MainViewModel @Inject constructor(
     private val service: ApiService
 ) : ViewModel() {
 
-    private val _state: MutableStateFlow<MainUIState> = MutableStateFlow(MainUIState.Loading)
-    val state: StateFlow<MainUIState> get() = _state
+    private val _state: MutableStateFlow<MainState> = MutableStateFlow(MainState.Loading)
+    val state: StateFlow<MainState> get() = _state
 
-    val eventSharedFlow: MutableSharedFlow<MainEvents> = MutableSharedFlow()
+    val intent: Channel<MainIntent> = Channel(Channel.UNLIMITED)
+    val effects: MutableSharedFlow<MainEffect> = MutableSharedFlow()
 
-    fun fetch() = viewModelScope.launch {
-        _state.value = MainUIState.Loading
+    init {
+        handleIntent()
+    }
 
-        try {
+    private fun handleIntent() = viewModelScope.launch {
+        intent.consumeAsFlow().collect {
+            when (it) {
 
-            val list = service.getCatsImageList()
-            _state.value = MainUIState.ImagesLoaded(list)
-        } catch (e: Exception) {
+                is MainIntent.FetchImages -> fetch()
 
-            _state.value = MainUIState.Error(message = e.message)
+                is MainIntent.OpenDetailsScreen -> {
+                    effects.emit(MainEffect.OpenDetails(it.url))
+                }
+            }
         }
     }
 
-    fun send(event: MainEvents.OpenImageDetails) = viewModelScope.launch {
-        eventSharedFlow.emit(event)
+    private fun fetch() = viewModelScope.launch {
+        _state.value = MainState.Loading
+        try {
+            val list = service.getCatsImageList()
+            _state.value = MainState.Images(list)
+        } catch (e: Exception) {
+            _state.value = MainState.Error(e.message.toString())
+        }
     }
 }
