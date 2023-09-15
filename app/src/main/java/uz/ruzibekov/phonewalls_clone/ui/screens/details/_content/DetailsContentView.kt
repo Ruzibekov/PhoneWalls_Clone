@@ -49,7 +49,8 @@ object DetailsContentView {
     }
 
     @Composable
-    private fun Content(url: String) {
+    private fun Content(url: String, ) {
+
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.BottomCenter

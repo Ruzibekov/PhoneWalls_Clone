@@ -5,5 +5,7 @@ import uz.ruzibekov.phonewalls_clone.R
 
 object PhoneWallsIcons {
 
-    val Unfavorite = R.drawable.ic_unfavorite
+    val UnFavorite = R.drawable.ic_unfavorite
+    val Favorite = R.drawable.ic_favorite
+    val Home = R.drawable.ic_home
 }

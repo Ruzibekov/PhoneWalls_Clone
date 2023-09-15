@@ -11,8 +11,9 @@ import kotlinx.coroutines.launch
 import uz.ruzibekov.phonewalls_clone.ui.screens.base.BaseActivity
 import uz.ruzibekov.phonewalls_clone.ui.screens.details.DetailsActivity
 import uz.ruzibekov.phonewalls_clone.ui.screens.main._content.MainContentView
-import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainEffect
 import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainIntent
+import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainNavEffect
+import uz.ruzibekov.phonewalls_clone.ui.screens.settings.SettingsActivity
 import uz.ruzibekov.phonewalls_clone.utils.ExtraConstants
 
 @AndroidEntryPoint
@@ -27,21 +28,28 @@ class MainActivity : BaseActivity() {
     override fun initialize() {
 
         lifecycleScope.launch {
-            viewModel.intent.send(MainIntent.FetchImages)
+            viewModel.handleIntent(MainIntent.FetchImages)
         }
 
-        viewModel.effects
-            .onEach { effect ->
-                when (effect) {
-                    is MainEffect.OpenDetails -> openImageDetailsScreen(effect.url)
-                }
+        viewModel.navigationEffect.onEach { effect ->
+
+            when (effect) {
+
+                is MainNavEffect.Details -> openImageDetailsScreen(effect.url)
+
+                is MainNavEffect.Settings -> openSettingsScreen()
             }
-            .launchIn(lifecycleScope)
+        }.launchIn(lifecycleScope)
     }
 
     private fun openImageDetailsScreen(url: String) {
         val intent = Intent(this, DetailsActivity::class.java)
         intent.putExtra(ExtraConstants.URL, url)
+        startActivity(intent)
+    }
+
+    private fun openSettingsScreen() {
+        val intent = Intent(this, SettingsActivity::class.java)
         startActivity(intent)
     }
 }

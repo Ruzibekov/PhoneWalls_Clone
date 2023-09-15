@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,8 +26,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
 import uz.ruzibekov.phonewalls_clone.data.model.ImageResponse
 import uz.ruzibekov.phonewalls_clone.ui.components.LoadingView
 import uz.ruzibekov.phonewalls_clone.ui.screens.main.MainViewModel
@@ -38,7 +35,7 @@ import uz.ruzibekov.phonewalls_clone.ui.theme.Brushes
 import uz.ruzibekov.phonewalls_clone.ui.theme.PhoneWallsColors
 import uz.ruzibekov.phonewalls_clone.ui.theme.PhoneWallsIcons
 
-object AllWallpapersFragmentView {
+object HomeFragmentView {
 
     @Composable
     fun Default(viewModel: MainViewModel) {
@@ -50,7 +47,9 @@ object AllWallpapersFragmentView {
 
             is MainState.Images -> Content(
                 list = (state as MainState.Images).list,
-                intent = viewModel.intent
+                onClick = {
+                    viewModel.handleIntent(MainIntent.OpenDetails(it))
+                }
             )
 
             is MainState.Error -> Text(text = "error")
@@ -60,10 +59,8 @@ object AllWallpapersFragmentView {
     @Composable
     private fun Content(
         list: List<ImageResponse>,
-        intent: Channel<MainIntent>
+        onClick: (url: String) -> Unit
     ) {
-        val scope = rememberCoroutineScope()
-
         LazyVerticalGrid(
             columns = GridCells.Adaptive(150.dp),
             contentPadding = PaddingValues(2.5.dp)
@@ -73,11 +70,7 @@ object AllWallpapersFragmentView {
 
                 Item(
                     data = image,
-                    onClick = {
-                        scope.launch {
-                            intent.send(MainIntent.OpenDetailsScreen(image.url))
-                        }
-                    }
+                    onClick = onClick
                 )
             }
         }
@@ -115,7 +108,7 @@ object AllWallpapersFragmentView {
                 IconButton(onClick = { /*TODO*/ }) {
 
                     Icon(
-                        painter = painterResource(id = PhoneWallsIcons.Unfavorite),
+                        painter = painterResource(id = PhoneWallsIcons.UnFavorite),
                         contentDescription = "favorite icon",
                         modifier = Modifier.size(24.dp),
                         tint = PhoneWallsColors.White

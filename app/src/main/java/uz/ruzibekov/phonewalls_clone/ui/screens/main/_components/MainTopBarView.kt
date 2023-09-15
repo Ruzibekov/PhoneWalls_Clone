@@ -17,12 +17,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import uz.ruzibekov.phonewalls_clone.R
+import uz.ruzibekov.phonewalls_clone.ui.screens.main.MainViewModel
+import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainIntent
 
 object MainTopBarView {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun Default() {
+    fun Default(viewModel: MainViewModel) {
 
         var showMenu by remember { mutableStateOf(false) }
 
@@ -51,7 +53,9 @@ object MainTopBarView {
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         },
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            viewModel.handleIntent(MainIntent.OpenSettings)
+                        },
                     )
                 }
             }

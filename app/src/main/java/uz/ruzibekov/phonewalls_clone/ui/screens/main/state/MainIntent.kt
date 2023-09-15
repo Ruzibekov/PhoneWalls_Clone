@@ -4,5 +4,7 @@ sealed class MainIntent {
 
     object FetchImages : MainIntent()
 
-    class OpenDetailsScreen(val url: String) : MainIntent()
+    class OpenDetails(val url: String) : MainIntent()
+
+    object OpenSettings : MainIntent()
 }
