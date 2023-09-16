@@ -19,6 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,12 +52,7 @@ object HomeFragmentView {
 
             else -> Content(
                 list = state.wallpapers,
-                onItemClick = {
-                    viewModel.send(MainIntent.OpenDetails(it))
-                },
-                favoriteClick = {
-                    viewModel.send(MainIntent.AddFavorite(it))
-                }
+                viewModel = viewModel
             )
         }
     }
@@ -62,8 +60,7 @@ object HomeFragmentView {
     @Composable
     private fun Content(
         list: List<WallpaperResponse>,
-        onItemClick: (url: String) -> Unit,
-        favoriteClick: (id: String) -> Unit
+        viewModel: MainViewModel
     ) {
 
         LazyVerticalGrid(
@@ -75,7 +72,16 @@ object HomeFragmentView {
 
                 Item(
                     data = image,
-                    onClick = onItemClick
+                    isFavorite = viewModel.checkWallpaperToFavorite(image.id),
+                    onClick = {
+                        viewModel.send(MainIntent.OpenDetails(it))
+                    },
+                    addToFavorites = {
+                        viewModel.send(MainIntent.AddFavorite(it))
+                    },
+                    removeFromFavorites = {
+                        viewModel.send(MainIntent.RemoveFavorite(it))
+                    }
                 )
             }
         }
@@ -84,8 +90,13 @@ object HomeFragmentView {
     @Composable
     private fun Item(
         data: WallpaperResponse,
-        onClick: (url: String) -> Unit
+        isFavorite: Boolean,
+        onClick: (url: String) -> Unit,
+        addToFavorites: (id: String) -> Unit,
+        removeFromFavorites: (id: String) -> Unit
     ) {
+
+        var favorite by remember { mutableStateOf(isFavorite) }
 
         Box(
             modifier = Modifier
@@ -110,15 +121,28 @@ object HomeFragmentView {
                     .background(Brushes.Dark_Transparent)
             )
 
-                IconButton(onClick = { /*TODO*/ }) {
-
-                    Icon(
-                        painter = painterResource(id = PhoneWallsIcons.UnFavorite),
-                        contentDescription = "favorite icon",
-                        modifier = Modifier.size(24.dp),
-                        tint = PhoneWallsColors.White
-                    )
+            IconButton(
+                onClick = {
+                    favorite = if (isFavorite) {
+                        removeFromFavorites(data.id)
+                        false
+                    } else {
+                        addToFavorites(data.id)
+                        true
+                    }
                 }
+            ) {
+
+                Icon(
+                    painter = painterResource(
+                        id = if (favorite) PhoneWallsIcons.Favorite
+                        else PhoneWallsIcons.UnFavorite
+                    ),
+                    contentDescription = "favorite icon",
+                    modifier = Modifier.size(24.dp),
+                    tint = PhoneWallsColors.White
+                )
+            }
         }
     }
 }

@@ -40,6 +40,10 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun checkWallpaperToFavorite(id: String): Boolean {
+        return localManager.favorites.contains(id)
+    }
+
     private fun fetch() = viewModelScope.launch {
         _state.value = MainState(isLoading = true)
         try {

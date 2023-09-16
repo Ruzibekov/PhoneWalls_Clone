@@ -10,7 +10,7 @@ class LocalManager @Inject constructor(
     private val gson: Gson
 ) {
 
-    var favorites = emptyList<String>()
+    var favorites: List<String> = emptyList()
         get() {
             val json = preferences.getString("favorites", "") ?: ""
             return if (json.isNotEmpty())
