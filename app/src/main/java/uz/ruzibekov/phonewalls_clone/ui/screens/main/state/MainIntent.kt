@@ -7,4 +7,8 @@ sealed class MainIntent {
     class OpenDetails(val url: String) : MainIntent()
 
     object OpenSettings : MainIntent()
+
+    class AddFavorite(val id: String) : MainIntent()
+
+    class RemoveFavorite(val id: String) : MainIntent()
 }

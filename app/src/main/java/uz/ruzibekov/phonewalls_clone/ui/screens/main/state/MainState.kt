@@ -1,12 +1,10 @@
 package uz.ruzibekov.phonewalls_clone.ui.screens.main.state
 
-import uz.ruzibekov.phonewalls_clone.data.model.ImageResponse
+import uz.ruzibekov.phonewalls_clone.data.model.WallpaperResponse
 
-sealed class MainState {
-
-    object Loading : MainState()
-
-    data class Images(val list: List<ImageResponse>) : MainState()
-
-    data class Error(val message: String) : MainState()
-}
+data class MainState(
+    val isLoading: Boolean = false,
+    val wallpapers: List<WallpaperResponse> = emptyList(),
+    val favorites: List<String> = emptyList(),
+    val error: String = "",
+)

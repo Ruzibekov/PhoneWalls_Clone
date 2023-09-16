@@ -12,7 +12,7 @@ import uz.ruzibekov.phonewalls_clone.ui.screens.base.BaseActivity
 import uz.ruzibekov.phonewalls_clone.ui.screens.details.DetailsActivity
 import uz.ruzibekov.phonewalls_clone.ui.screens.main._content.MainContentView
 import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainIntent
-import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainNavEffect
+import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainNavigation
 import uz.ruzibekov.phonewalls_clone.ui.screens.settings.SettingsActivity
 import uz.ruzibekov.phonewalls_clone.utils.ExtraConstants
 
@@ -28,16 +28,16 @@ class MainActivity : BaseActivity() {
     override fun initialize() {
 
         lifecycleScope.launch {
-            viewModel.handleIntent(MainIntent.FetchImages)
+            viewModel.send(MainIntent.FetchImages)
         }
 
-        viewModel.navigationEffect.onEach { effect ->
+        viewModel.navigation.onEach { effect ->
 
             when (effect) {
 
-                is MainNavEffect.Details -> openImageDetailsScreen(effect.url)
+                is MainNavigation.Details -> openImageDetailsScreen(effect.url)
 
-                is MainNavEffect.Settings -> openSettingsScreen()
+                is MainNavigation.Settings -> openSettingsScreen()
             }
         }.launchIn(lifecycleScope)
     }

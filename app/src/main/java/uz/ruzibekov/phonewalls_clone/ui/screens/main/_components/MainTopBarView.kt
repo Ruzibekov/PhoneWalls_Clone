@@ -54,7 +54,7 @@ object MainTopBarView {
                             )
                         },
                         onClick = {
-                            viewModel.handleIntent(MainIntent.OpenSettings)
+                            viewModel.send(MainIntent.OpenSettings)
                         },
                     )
                 }

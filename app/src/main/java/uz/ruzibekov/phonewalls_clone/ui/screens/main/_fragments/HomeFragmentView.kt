@@ -26,11 +26,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import uz.ruzibekov.phonewalls_clone.data.model.ImageResponse
+import uz.ruzibekov.phonewalls_clone.data.model.WallpaperResponse
 import uz.ruzibekov.phonewalls_clone.ui.components.LoadingView
 import uz.ruzibekov.phonewalls_clone.ui.screens.main.MainViewModel
 import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainIntent
-import uz.ruzibekov.phonewalls_clone.ui.screens.main.state.MainState
 import uz.ruzibekov.phonewalls_clone.ui.theme.Brushes
 import uz.ruzibekov.phonewalls_clone.ui.theme.PhoneWallsColors
 import uz.ruzibekov.phonewalls_clone.ui.theme.PhoneWallsIcons
@@ -42,25 +41,31 @@ object HomeFragmentView {
 
         val state by viewModel.state.collectAsState()
 
-        when (state) {
-            is MainState.Loading -> LoadingView.Default()
+        when {
 
-            is MainState.Images -> Content(
-                list = (state as MainState.Images).list,
-                onClick = {
-                    viewModel.handleIntent(MainIntent.OpenDetails(it))
+            state.isLoading -> LoadingView.Default()
+
+            state.error.isNotEmpty() -> Text(text = "error")
+
+            else -> Content(
+                list = state.wallpapers,
+                onItemClick = {
+                    viewModel.send(MainIntent.OpenDetails(it))
+                },
+                favoriteClick = {
+                    viewModel.send(MainIntent.AddFavorite(it))
                 }
             )
-
-            is MainState.Error -> Text(text = "error")
         }
     }
 
     @Composable
     private fun Content(
-        list: List<ImageResponse>,
-        onClick: (url: String) -> Unit
+        list: List<WallpaperResponse>,
+        onItemClick: (url: String) -> Unit,
+        favoriteClick: (id: String) -> Unit
     ) {
+
         LazyVerticalGrid(
             columns = GridCells.Adaptive(150.dp),
             contentPadding = PaddingValues(2.5.dp)
@@ -70,7 +75,7 @@ object HomeFragmentView {
 
                 Item(
                     data = image,
-                    onClick = onClick
+                    onClick = onItemClick
                 )
             }
         }
@@ -78,7 +83,7 @@ object HomeFragmentView {
 
     @Composable
     private fun Item(
-        data: ImageResponse,
+        data: WallpaperResponse,
         onClick: (url: String) -> Unit
     ) {
 
