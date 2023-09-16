@@ -1,5 +1,6 @@
 package uz.ruzibekov.phonewalls_clone.ui.screens.details._content
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,18 +21,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import uz.ruzibekov.phonewalls_clone.R
+import uz.ruzibekov.phonewalls_clone.data.model.WallpaperResponse
 import uz.ruzibekov.phonewalls_clone.ui.components.LoadingView
 import uz.ruzibekov.phonewalls_clone.ui.screens.details.DetailsViewModel
+import uz.ruzibekov.phonewalls_clone.ui.screens.details.state.DetailsIntent
 import uz.ruzibekov.phonewalls_clone.ui.screens.details.state.DetailsState
 import uz.ruzibekov.phonewalls_clone.ui.theme.PhoneWallsColors
+import uz.ruzibekov.phonewalls_clone.ui.theme.PhoneWallsIcons
 
 object DetailsContentView {
 
@@ -44,12 +50,18 @@ object DetailsContentView {
 
             is DetailsState.Default -> LoadingView.Default()
 
-            is DetailsState.ShowImage -> Content((state as DetailsState.ShowImage).url)
+            is DetailsState.ShowImage -> Content(
+                (state as DetailsState.ShowImage).data,
+                viewModel = viewModel
+            )
         }
     }
 
     @Composable
-    private fun Content(url: String, ) {
+    private fun Content(
+        data: WallpaperResponse,
+        viewModel: DetailsViewModel
+    ) {
 
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -57,14 +69,17 @@ object DetailsContentView {
         ) {
 
             AsyncImage(
-                model = url,
+                model = data.url,
                 contentDescription = "wallpaper",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(PhoneWallsColors.Black),
             )
 
             IconButton(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    viewModel.send(DetailsIntent.OnBackStack)
+                },
                 modifier = Modifier
                     .statusBarsPadding()
                     .align(Alignment.TopStart)
@@ -88,17 +103,35 @@ object DetailsContentView {
                 Item(
                     icon = R.drawable.ic_download,
                     textRes = R.string.download
-                )
+                ) {
+                    viewModel.send(DetailsIntent.DownloadImage)
+                }
 
                 Item(
                     icon = R.drawable.ic_load,
                     textRes = R.string.set_wallpaper
-                )
+                ) {
+                    viewModel.send(DetailsIntent.SetWallpaper)
+                }
+
+                var isFavorite by remember {
+                    mutableStateOf(viewModel.checkWallpaperInFavorite())
+                }
 
                 Item(
-                    icon = R.drawable.ic_unfavorite,
+                    icon = if (isFavorite)
+                        PhoneWallsIcons.Favorite
+                    else
+                        PhoneWallsIcons.UnFavorite,
                     textRes = R.string.favorite
-                )
+                ) {
+                    if (isFavorite)
+                        viewModel.send(DetailsIntent.RemoveFromFavorites)
+                    else
+                        viewModel.send(DetailsIntent.AddToFavorites)
+
+                    isFavorite = !isFavorite
+                }
             }
         }
     }
@@ -107,16 +140,20 @@ object DetailsContentView {
     private fun Item(
         icon: Int,
         textRes: Int,
+        onClick: () -> Unit
     ) {
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-            Icon(
-                painter = painterResource(id = icon),
-                contentDescription = "icon",
-                modifier = Modifier.size(24.dp),
-                tint = PhoneWallsColors.White
-            )
+            IconButton(onClick = onClick) {
+
+                Icon(
+                    painter = painterResource(id = icon),
+                    contentDescription = "icon",
+                    modifier = Modifier.size(24.dp),
+                    tint = PhoneWallsColors.White
+                )
+            }
 
             Spacer(modifier = Modifier.height(5.dp))
 

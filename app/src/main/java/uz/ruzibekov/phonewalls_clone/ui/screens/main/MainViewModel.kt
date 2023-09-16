@@ -30,7 +30,7 @@ class MainViewModel @Inject constructor(
         when (intent) {
             is MainIntent.FetchImages -> fetch()
 
-            is MainIntent.OpenDetails -> navigation.emit(MainNavigation.Details(intent.url))
+            is MainIntent.OpenDetails -> navigation.emit(MainNavigation.Details(intent.data))
 
             is MainIntent.OpenSettings -> navigation.emit(MainNavigation.Settings)
 

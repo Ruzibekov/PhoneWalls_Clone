@@ -91,12 +91,14 @@ object HomeFragmentView {
     private fun Item(
         data: WallpaperResponse,
         isFavorite: Boolean,
-        onClick: (url: String) -> Unit,
+        onClick: (data: WallpaperResponse) -> Unit,
         addToFavorites: (id: String) -> Unit,
         removeFromFavorites: (id: String) -> Unit
     ) {
 
-        var favorite by remember { mutableStateOf(isFavorite) }
+        var favorite by remember {
+            mutableStateOf(isFavorite)
+        }
 
         Box(
             modifier = Modifier
@@ -104,7 +106,7 @@ object HomeFragmentView {
                 .fillMaxWidth()
                 .height(250.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .clickable { onClick(data.url) },
+                .clickable { onClick(data) },
             contentAlignment = Alignment.BottomEnd
         ) {
 
@@ -123,13 +125,12 @@ object HomeFragmentView {
 
             IconButton(
                 onClick = {
-                    favorite = if (isFavorite) {
+                    if (favorite)
                         removeFromFavorites(data.id)
-                        false
-                    } else {
+                    else
                         addToFavorites(data.id)
-                        true
-                    }
+
+                    favorite = !favorite
                 }
             ) {
 

@@ -1,10 +1,12 @@
 package uz.ruzibekov.phonewalls_clone.ui.screens.main.state
 
+import uz.ruzibekov.phonewalls_clone.data.model.WallpaperResponse
+
 sealed class MainIntent {
 
     object FetchImages : MainIntent()
 
-    class OpenDetails(val url: String) : MainIntent()
+    class OpenDetails(val data: WallpaperResponse) : MainIntent()
 
     object OpenSettings : MainIntent()
 
